@@ -16,7 +16,7 @@ public class TarefasServiceImpl implements TarefasService {
     private TarefasRepository tarefasRepository;
 
     @Override
-    public List<Tarefas> listaTarefas(Long usuarioId) {
+    public List<Tarefas> listarTarefas(Long usuarioId) {
         return tarefasRepository.findAllByUsuarioId(usuarioId);
     }
 
@@ -38,6 +38,12 @@ public class TarefasServiceImpl implements TarefasService {
         tarefa.setDescricao(tarefaAtualizada.getDescricao());
 
         return tarefasRepository.save(tarefaAtualizada);
+    }
+
+    @Override
+    public Tarefas pegarTarefaPorId(Long id) {
+        return tarefasRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Tarefa não encontrada com o ID: " + id));
     }
 
 }

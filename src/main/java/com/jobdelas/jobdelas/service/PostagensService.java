@@ -8,13 +8,10 @@ import com.jobdelas.jobdelas.model.Postagens;
 public interface PostagensService {
     List<Postagens> listarTodasPostagens();
 
-    List<Postagens> listarPostagensPorCategoria(String categoria);
-
     Postagens cadastrarPostagens(Postagens postagens);
 
     void deletarPostagens(Long id);
 
-        PostagemDTO convertToDTO(Postagens postagens);
-
+    PostagemDTO convertToDTO(Postagens postagens);
 
 }

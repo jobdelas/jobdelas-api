@@ -1,9 +1,5 @@
 package com.jobdelas.jobdelas.dto;
 
-import java.time.LocalDateTime;
+public record RegistroPostagemDTO(String conteudo) {
 
-import com.jobdelas.jobdelas.model.Usuarios;
-
-public record RegistroPostagemDTO(Usuarios usuarios, String conteudo,  String categoria, LocalDateTime data_postagem) {
-    
 }

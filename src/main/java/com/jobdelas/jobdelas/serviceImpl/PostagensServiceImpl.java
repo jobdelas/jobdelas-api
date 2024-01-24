@@ -6,13 +6,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jobdelas.jobdelas.dto.PostagemDTO;
+import com.jobdelas.jobdelas.dto.RegistroPostagemDTO;
 import com.jobdelas.jobdelas.model.Postagens;
 import com.jobdelas.jobdelas.repository.PostagensRepository;
 import com.jobdelas.jobdelas.service.PostagensService;
 
+import jakarta.transaction.Transactional;
+
 @Service
-public class PostagensServiceImpl implements PostagensService{
-    
+public class PostagensServiceImpl implements PostagensService {
+
     @Autowired
     private PostagensRepository postagensRepository;
 
@@ -22,11 +25,7 @@ public class PostagensServiceImpl implements PostagensService{
     }
 
     @Override
-    public List<Postagens> listarPostagensPorCategoria(String categoria) {
-        return null;
-
-    }
-    @Override
+    @Transactional
     public Postagens cadastrarPostagens(Postagens postagens) {
         return postagensRepository.save(postagens);
     }
@@ -36,16 +35,13 @@ public class PostagensServiceImpl implements PostagensService{
         postagensRepository.deleteById(id);
     }
 
- @Override
+    @Override
     public PostagemDTO convertToDTO(Postagens postagens) {
         return new PostagemDTO(
                 postagens.getId(),
                 postagens.getUsuarios().getNome(),
                 postagens.getConteudo(),
-                postagens.getData_postagem(),
-                postagens.getCurtidas_total()
-        );
+                postagens.getData());
     }
-
 
 }

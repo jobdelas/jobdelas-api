@@ -11,7 +11,7 @@ import jakarta.persistence.ManyToOne;
 
 @Entity
 public class Postagens {
-     @Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -20,30 +20,15 @@ public class Postagens {
     private Usuarios usuarios;
 
     private String conteudo;
-    private String categoria;
 
-    
-    public Postagens(Long id, Usuarios usuarios, String conteudo, String categoria, LocalDateTime data_postagem,
-            Integer curtidas_total) {
+    private LocalDateTime data;
+
+    public Postagens(Long id, Usuarios usuarios, String conteudo, LocalDateTime data) {
         this.id = id;
         this.usuarios = usuarios;
         this.conteudo = conteudo;
-        this.categoria = categoria;
-        this.data_postagem = data_postagem;
-        this.curtidas_total = curtidas_total;
+        this.data = data;
     }
-
-    public String getCategoria() {
-        return categoria;
-    }
-
-    public void setCategoria(String categoria) {
-        this.categoria = categoria;
-    }
-
-    private LocalDateTime data_postagem;
-    private Integer curtidas_total;
-
 
     public Long getId() {
         return id;
@@ -69,25 +54,15 @@ public class Postagens {
         this.conteudo = conteudo;
     }
 
-    public LocalDateTime getData_postagem() {
-        return data_postagem;
+    public LocalDateTime getData() {
+        return data;
     }
 
-    public void setData_postagem(LocalDateTime data_postagem) {
-        this.data_postagem = data_postagem;
-    }
-
-    public Integer getCurtidas_total() {
-        return curtidas_total;
-    }
-
-    public void setCurtidas_total(Integer curtidas_total) {
-        this.curtidas_total = curtidas_total;
+    public void setData(LocalDateTime data) {
+        this.data = data;
     }
 
     public Postagens() {
 
-}
-
-
+    }
 }

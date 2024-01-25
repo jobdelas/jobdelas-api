@@ -7,9 +7,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,7 +28,7 @@ import com.jobdelas.jobdelas.service.UsuariosService;
 @RestController
 @RequestMapping("auth")
 public class UsuarioController {
-    
+
     @Autowired
     private TokenService tokenService;
 
@@ -48,22 +51,23 @@ public class UsuarioController {
             var token = tokenService.gerarToken((Usuarios) auth.getPrincipal());
             return ResponseEntity.ok(new LoginResponseDTO(token));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Email ou senha invalidos");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Email ou senha inválidos");
         }
     }
 
     @CrossOrigin
     @PostMapping("/cadastrar")
-    public ResponseEntity<Usuarios> cadastrarUsuario(@RequestBody RegistroUsuarioDTO data) {
+    public ResponseEntity<?> cadastrarUsuario(@RequestBody RegistroUsuarioDTO data) {
 
         Usuarios usuarioExistente = usuariosService.encontrarUsuarioPorEmail(data.email());
 
-        if(usuarioExistente != null) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        if (usuarioExistente != null) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Email já existe");
+
         }
 
         String senhaCriptografada = new BCryptPasswordEncoder().encode(data.senha());
-        
+
         Usuarios novoUsuario = new Usuarios();
         novoUsuario.setNome(data.nome());
         novoUsuario.setEmail(data.email());
@@ -74,5 +78,43 @@ public class UsuarioController {
 
         return ResponseEntity.ok().body(novoUsuario);
 
-    } 
+    }
+
+    @CrossOrigin
+    @PutMapping("/editar")
+    public ResponseEntity<?> editarUsuario(@RequestBody Usuarios usuarioAtualizado) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Usuarios usuarioExistente = usuariosService.encontrarUsuarioPorEmail(auth.getName());
+
+        if (usuarioExistente == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Usuarios usuarioComMesmoEmail = usuariosService.encontrarUsuarioPorEmail(usuarioAtualizado.getEmail());
+        if (usuarioComMesmoEmail != null && !usuarioComMesmoEmail.getId().equals(usuarioExistente.getId())) {
+            return ResponseEntity.badRequest().body("E-mail já está em uso por outro usuário.");
+        }
+
+        try {
+            usuarioExistente.setEmail(usuarioAtualizado.getEmail());
+            usuarioExistente.setFoto(usuarioAtualizado.getFoto());
+            usuarioExistente.setStatus(usuarioAtualizado.getStatus());
+            usuarioExistente.setNascimento(usuarioAtualizado.getNascimento());
+            usuarioExistente.setCep(usuarioAtualizado.getCep());
+
+            if (usuarioAtualizado.getSenha() == null) {
+                usuarioExistente.setSenha(usuarioExistente.getSenha());
+            } else {
+                String senhaCriptografada = new BCryptPasswordEncoder().encode(usuarioAtualizado.getSenha());
+                usuarioExistente.setSenha(senhaCriptografada);
+            }
+
+            this.usuariosRepository.save(usuarioExistente);
+
+            return ResponseEntity.ok().body(usuarioExistente);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 }

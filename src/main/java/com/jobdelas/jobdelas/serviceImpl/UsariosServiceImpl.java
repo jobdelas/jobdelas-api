@@ -27,22 +27,6 @@ public class UsariosServiceImpl implements UsuariosService {
     }
 
     @Override
-    public Usuarios editarUsuario(Usuarios usuario) {
-        Usuarios usuarioExistente = usuariosRepository.findById(usuario.getId())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-
-        usuarioExistente.setNome(usuario.getNome());
-        usuarioExistente.setEmail(usuario.getEmail());
-        usuarioExistente.setFoto(usuario.getFoto());
-        usuarioExistente.setStatus(usuario.getStatus());
-        usuarioExistente.setNascimento(usuario.getNascimento());
-        usuarioExistente.setCep(usuario.getCep());
-        usuarioExistente.setSenha(usuario.getSenha());
-
-        return usuariosRepository.save(usuarioExistente);
-    }
-
-    @Override
     public Usuarios cadastrarUsuario(Usuarios novoUsuario) {
         return usuariosRepository.save(novoUsuario);
     }

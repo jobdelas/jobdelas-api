@@ -13,7 +13,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity
-public class Usuarios implements UserDetails{
+public class Usuarios implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,21 +26,15 @@ public class Usuarios implements UserDetails{
     private String senha;
 
     private UsuariosRole cargo;
-    
+
     private String foto;
 
     private String status;
 
-    private String nascimento;
-
     private String cep;
 
-    public Usuarios() {
-        
-    }
-
     public Usuarios(Long id, String nome, String email, String senha, UsuariosRole cargo, String foto, String status,
-            String nascimento, String cep) {
+            String cep) {
         this.id = id;
         this.nome = nome;
         this.email = email;
@@ -48,100 +42,76 @@ public class Usuarios implements UserDetails{
         this.cargo = cargo;
         this.foto = foto;
         this.status = status;
-        this.nascimento = nascimento;
         this.cep = cep;
     }
-
 
     public Long getId() {
         return id;
     }
 
-
     public void setId(Long id) {
         this.id = id;
     }
-
 
     public String getNome() {
         return nome;
     }
 
-
     public void setNome(String nome) {
         this.nome = nome;
     }
-
 
     public String getEmail() {
         return email;
     }
 
-
     public void setEmail(String email) {
         this.email = email;
     }
-
 
     public String getSenha() {
         return senha;
     }
 
-
     public void setSenha(String senha) {
         this.senha = senha;
     }
-
 
     public UsuariosRole getCargo() {
         return cargo;
     }
 
-
     public void setCargo(UsuariosRole cargo) {
         this.cargo = cargo;
     }
-
 
     public String getFoto() {
         return foto;
     }
 
-
     public void setFoto(String foto) {
         this.foto = foto;
     }
-
 
     public String getStatus() {
         return status;
     }
 
-
     public void setStatus(String status) {
         this.status = status;
     }
-
-
-    public String getNascimento() {
-        return nascimento;
-    }
-
-
-    public void setNascimento(String nascimento) {
-        this.nascimento = nascimento;
-    }
-
 
     public String getCep() {
         return cep;
     }
 
-
     public void setCep(String cep) {
         this.cep = cep;
     }
 
+    public Usuarios() {
+
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -150,7 +120,6 @@ public class Usuarios implements UserDetails{
         else
             return List.of(new SimpleGrantedAuthority("ROLE_USER"));
     }
-
 
     @Override
     public String getPassword() {
@@ -164,7 +133,7 @@ public class Usuarios implements UserDetails{
 
     @Override
     public boolean isAccountNonExpired() {
-      return true;
+        return true;
     }
 
     @Override
@@ -181,5 +150,5 @@ public class Usuarios implements UserDetails{
     public boolean isEnabled() {
         return true;
     }
-    
+
 }

@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -99,7 +100,6 @@ public class UsuarioController {
             usuarioExistente.setEmail(usuarioAtualizado.getEmail());
             usuarioExistente.setFoto(usuarioAtualizado.getFoto());
             usuarioExistente.setStatus(usuarioAtualizado.getStatus());
-            usuarioExistente.setNascimento(usuarioAtualizado.getNascimento());
             usuarioExistente.setCep(usuarioAtualizado.getCep());
 
             if (usuarioAtualizado.getSenha() == null) {
@@ -115,6 +115,14 @@ public class UsuarioController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    @CrossOrigin
+    @GetMapping("/detalhes")
+    public Usuarios obterDetalhesUsuarioLogado() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String emailUsuarioLogado = auth.getName();
+        return usuariosService.encontrarUsuarioPorEmail(emailUsuarioLogado);
     }
 
 }

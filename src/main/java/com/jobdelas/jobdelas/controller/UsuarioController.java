@@ -1,8 +1,13 @@
 package com.jobdelas.jobdelas.controller;
 
-import javax.naming.AuthenticationException;
+import java.io.IOException;
+
+import org.springframework.http.HttpHeaders;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -10,14 +15,22 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jobdelas.jobdelas.dto.LoginResponseDTO;
 import com.jobdelas.jobdelas.dto.RegistroUsuarioDTO;
 import com.jobdelas.jobdelas.dto.UsuarioDTO;
@@ -41,6 +54,11 @@ public class UsuarioController {
 
     @Autowired
     private UsuariosService usuariosService;
+
+    @Value("${imgur.client-id}")
+    private String imgurClientId;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @CrossOrigin
     @PostMapping("/logar")
@@ -98,7 +116,7 @@ public class UsuarioController {
 
         try {
             usuarioExistente.setEmail(usuarioAtualizado.getEmail());
-            usuarioExistente.setFoto(usuarioAtualizado.getFoto());
+            usuarioExistente.setFoto(usuarioExistente.getFoto());
             usuarioExistente.setStatus(usuarioAtualizado.getStatus());
             usuarioExistente.setCep(usuarioAtualizado.getCep());
 
@@ -125,4 +143,62 @@ public class UsuarioController {
         return usuariosService.encontrarUsuarioPorEmail(emailUsuarioLogado);
     }
 
+    @CrossOrigin
+    @PatchMapping("/editar-foto")
+    public ResponseEntity<String> editarFotoUsuario(@RequestPart("foto") MultipartFile foto) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        Usuarios usuarioExistente = usuariosService.encontrarUsuarioPorEmail(auth.getName());
+
+        if (usuarioExistente == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        try {
+            String imgurUploadUrl = "https://api.imgur.com/3/image";
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Authorization", "Client-ID " + imgurClientId);
+
+            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+            body.add("image", new ByteArrayResource(foto.getBytes()) {
+                @Override
+                public String getFilename() {
+                    return "image.jpg";
+                }
+            });
+
+            HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+            ResponseEntity<String> response = new RestTemplate().postForEntity(imgurUploadUrl, requestEntity,
+                    String.class);
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                String imgurImageUrl = extractImageUrlFromImgurApiResponse(response.getBody());
+                usuarioExistente.setFoto(imgurImageUrl);
+                usuariosRepository.save(usuarioExistente);
+                return ResponseEntity.ok()
+                        .body("Foto do usuário atualizada com sucesso. URL da imagem: " + imgurImageUrl);
+            } else {
+                return ResponseEntity.status(response.getStatusCode())
+                        .body("Erro ao enviar a foto para Imgur. Resposta: " + response.getBody());
+            }
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erro ao processar a foto: " + e.getMessage());
+        }
+    }
+
+    private String extractImageUrlFromImgurApiResponse(String apiResponse) {
+        try {
+            JsonNode jsonNode = objectMapper.readTree(apiResponse);
+
+            if (jsonNode.has("data") && jsonNode.get("data").has("link")) {
+                return jsonNode.get("data").get("link").asText();
+            } else {
+                throw new RuntimeException("Resposta da API do Imgur não contém a URL da imagem esperada.");
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Erro ao analisar a resposta da API do Imgur.", e);
+        }
+    }
 }

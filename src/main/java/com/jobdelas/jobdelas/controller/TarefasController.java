@@ -31,12 +31,9 @@ public class TarefasController {
     private UsuariosService usuariosService;
 
     @CrossOrigin
-    @GetMapping
-    public ResponseEntity<List<Tarefas>> listarTodasTarefas() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Usuarios usuario = usuariosService.encontrarUsuarioPorEmail(auth.getName());
-
-        List<Tarefas> tarefas = tarefasService.listarTarefas(usuario.getId());
+    @GetMapping("/usuario/{usuarioId}")
+    public ResponseEntity<List<Tarefas>> listarTarefasPorUsuario(@PathVariable Long usuarioId) {
+        List<Tarefas> tarefas = tarefasService.listarTarefas(usuarioId);
         return ResponseEntity.ok(tarefas);
     }
 

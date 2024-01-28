@@ -14,4 +14,6 @@ public interface PostagensService {
 
     PostagemDTO convertToDTO(Postagens postagens);
 
+    int contarPostagensPorUsuario(String nomeUsuario);
+
 }

@@ -44,4 +44,9 @@ public class PostagensServiceImpl implements PostagensService {
                 postagens.getData());
     }
 
+    @Override
+    public int contarPostagensPorUsuario(String nomeUsuario) {
+        return postagensRepository.countByUsuarios_Nome(nomeUsuario);
+    }
+
 }

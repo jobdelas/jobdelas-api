@@ -66,4 +66,14 @@ public class PostagensController {
         }
     }
 
+    @CrossOrigin
+    @GetMapping("/contarPostagensPorUsuario")
+    public ResponseEntity<Integer> contarPostagensPorUsuario() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Usuarios usuario = usuariosService.encontrarUsuarioPorEmail(auth.getName());
+
+        int numeroPostagens = postagensService.contarPostagensPorUsuario(usuario.getNome());
+        return ResponseEntity.ok(numeroPostagens);
+    }
+
 }

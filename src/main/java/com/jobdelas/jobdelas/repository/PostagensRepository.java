@@ -8,4 +8,6 @@ import com.jobdelas.jobdelas.model.Postagens;
 @Repository
 public interface PostagensRepository extends JpaRepository<Postagens, Long> {
 
+    int countByUsuarios_Nome(String nomeUsuario);
+
 }

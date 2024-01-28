@@ -97,6 +97,7 @@ public class UsuarioController {
         }
 
         try {
+            usuarioExistente.setNome(usuarioAtualizado.getNome());
             usuarioExistente.setEmail(usuarioAtualizado.getEmail());
             usuarioExistente.setFoto(usuarioAtualizado.getFoto());
             usuarioExistente.setStatus(usuarioAtualizado.getStatus());

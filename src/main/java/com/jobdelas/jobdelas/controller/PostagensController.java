@@ -31,12 +31,10 @@ public class PostagensController {
 
     @CrossOrigin
     @GetMapping()
-    public ResponseEntity<List<PostagemDTO>> listarTodasPostagens() {
+    public ResponseEntity<List<Postagens>> listarTodasPostagens() {
         List<Postagens> listaPostagens = postagensService.listarTodasPostagens();
-        List<PostagemDTO> listaPostagensDTOs = listaPostagens.stream()
-                .map(postagensService::convertToDTO)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(listaPostagensDTOs);
+
+        return ResponseEntity.ok(listaPostagens);
     }
 
     @CrossOrigin
